@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import vaccineService from '@/services/api/vaccineService';
 
 const useVaccineAlerts = () => {
-  const [alerts, setAlerts] = useState({
+const [alerts, setAlerts] = useState({
     expired: 0,
     expiring: 0,
     lowStock: 0,
+    totalQuantity: 0,
     total: 0
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadAlerts = async () => {
+const loadAlerts = async () => {
       try {
         const vaccines = await vaccineService.getAll();
         const today = new Date();
@@ -19,18 +20,24 @@ const useVaccineAlerts = () => {
         let expired = 0;
         let expiring = 0;
         let lowStock = 0;
+        let totalQuantity = 0;
 
         vaccines.forEach(vaccine => {
           const expirationDate = new Date(vaccine.expirationDate);
           const diffTime = expirationDate - today;
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+          // Calculate total quantity on hand
+          totalQuantity += vaccine.quantityOnHand;
+
+          // Count expired vaccines
           if (diffDays < 0) {
             expired++;
           } else if (diffDays <= 30) {
             expiring++;
           }
 
+          // Count low stock vaccines
           if (vaccine.quantityOnHand <= 5) {
             lowStock++;
           }
@@ -40,6 +47,7 @@ const useVaccineAlerts = () => {
           expired,
           expiring,
           lowStock,
+          totalQuantity,
           total: expired + expiring + lowStock
         });
       } catch (error) {

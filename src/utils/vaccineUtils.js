@@ -57,11 +57,57 @@ export const filterVaccinesByStatus = (vaccines, status) => {
       case 'safe':
         return diffDays > 30;
       case 'lowStock':
-        return vaccine.quantityOnHand <= 5;
-      default:
-        return true;
-    }
+case 'lowStock':
+      return vaccine.quantityOnHand <= 5;
+    default:
+      return true;
+  }
+});
+};
+
+// Dashboard-specific utility functions
+export const calculateTotalQuantity = (vaccines) => {
+  return vaccines.reduce((total, vaccine) => total + vaccine.quantityOnHand, 0);
+};
+
+export const getExpiringVaccines = (vaccines, daysThreshold = 30) => {
+  const today = new Date();
+  return vaccines.filter(vaccine => {
+    const expirationDate = new Date(vaccine.expirationDate);
+    const diffTime = expirationDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 && diffDays <= daysThreshold;
   });
+};
+
+export const getExpiredVaccines = (vaccines) => {
+  const today = new Date();
+  return vaccines.filter(vaccine => {
+    const expirationDate = new Date(vaccine.expirationDate);
+    return expirationDate < today;
+  });
+};
+
+export const getLowStockVaccines = (vaccines, threshold = 5) => {
+  return vaccines.filter(vaccine => vaccine.quantityOnHand <= threshold);
+};
+
+export const calculateDashboardMetrics = (vaccines) => {
+  const totalQuantity = calculateTotalQuantity(vaccines);
+  const expiringVaccines = getExpiringVaccines(vaccines);
+  const expiredVaccines = getExpiredVaccines(vaccines);
+  const lowStockVaccines = getLowStockVaccines(vaccines);
+
+  return {
+    totalQuantity,
+    totalVaccines: vaccines.length,
+    expiringCount: expiringVaccines.length,
+    expiredCount: expiredVaccines.length,
+    lowStockCount: lowStockVaccines.length,
+    expiringVaccines,
+    expiredVaccines,
+lowStockVaccines
+  };
 };
 
 export const sortVaccines = (vaccines, sortBy, sortOrder = 'asc') => {

@@ -8,7 +8,7 @@ import Loading from '@/components/ui/Loading';
 import Error from '@/components/ui/Error';
 import Empty from '@/components/ui/Empty';
 import vaccineService from '@/services/api/vaccineService';
-
+import { calculateDashboardMetrics } from '@/utils/vaccineUtils';
 const InventoryPage = () => {
   const { searchTerm } = useOutletContext();
   const [vaccines, setVaccines] = useState([]);
@@ -38,37 +38,67 @@ const InventoryPage = () => {
     vaccine.lotNumber.toLowerCase().includes(searchTerm?.toLowerCase() || '')
   );
 
-  const getStats = () => {
-    const totalVaccines = vaccines.length;
-    const totalDoses = vaccines.reduce((sum, v) => sum + v.quantityOnHand, 0);
-    const expiredCount = vaccines.filter(v => new Date(v.expirationDate) < new Date()).length;
-    const expiringCount = vaccines.filter(v => {
-      const diffTime = new Date(v.expirationDate) - new Date();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays > 0 && diffDays <= 30;
-    }).length;
+const getStats = () => {
+    const metrics = calculateDashboardMetrics(vaccines);
 
     return [
-      { label: 'Total Vaccines', value: totalVaccines, icon: 'Package', color: 'primary' },
-      { label: 'Total Doses', value: totalDoses, icon: 'Syringe', color: 'success' },
-      { label: 'Expiring Soon', value: expiringCount, icon: 'Clock', color: 'warning' },
-      { label: 'Expired', value: expiredCount, icon: 'AlertTriangle', color: 'error' },
+      { 
+        label: 'Total Vaccines', 
+        value: metrics.totalVaccines, 
+        icon: 'Package', 
+        color: 'primary',
+        trend: metrics.totalVaccines > 0 ? 'up' : 'neutral',
+        trendValue: metrics.totalVaccines
+      },
+      { 
+        label: 'Total Quantity', 
+        value: metrics.totalQuantity, 
+        icon: 'Syringe', 
+        color: 'success',
+        trend: metrics.totalQuantity > 0 ? 'up' : 'neutral',
+        trendValue: metrics.totalQuantity
+      },
+      { 
+        label: 'Expiring Soon', 
+        value: metrics.expiringCount, 
+        icon: 'Clock', 
+        color: 'warning',
+        trend: metrics.expiringCount > 0 ? 'down' : 'neutral',
+        trendValue: metrics.expiringCount
+      },
+      { 
+        label: 'Expired', 
+        value: metrics.expiredCount, 
+        icon: 'AlertTriangle', 
+        color: 'error',
+        trend: metrics.expiredCount > 0 ? 'down' : 'neutral',
+        trendValue: metrics.expiredCount
+      },
     ];
   };
 
-  const getAlerts = () => {
-    const expiredCount = vaccines.filter(v => new Date(v.expirationDate) < new Date()).length;
-    const expiringCount = vaccines.filter(v => {
-      const diffTime = new Date(v.expirationDate) - new Date();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays > 0 && diffDays <= 30;
-    }).length;
-    const lowStockCount = vaccines.filter(v => v.quantityOnHand <= 5).length;
+const getAlerts = () => {
+    const metrics = calculateDashboardMetrics(vaccines);
 
     return [
-      { type: 'critical', title: 'Expired Vaccines', count: expiredCount, icon: 'AlertTriangle' },
-      { type: 'warning', title: 'Expiring Soon', count: expiringCount, icon: 'Clock' },
-      { type: 'info', title: 'Low Stock', count: lowStockCount, icon: 'Package' },
+      { 
+        type: 'critical', 
+        title: 'Expired Vaccines', 
+        count: metrics.expiredCount, 
+        icon: 'AlertTriangle' 
+      },
+      { 
+        type: 'warning', 
+        title: 'Expiring Soon', 
+        count: metrics.expiringCount, 
+        icon: 'Clock' 
+      },
+      { 
+        type: 'info', 
+        title: 'Low Stock', 
+        count: metrics.lowStockCount, 
+        icon: 'Package' 
+      },
     ];
   };
 
