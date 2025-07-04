@@ -1,0 +1,42 @@
+[
+  {
+    "Id": 1,
+    "vaccineId": 1,
+    "adjustmentAmount": -2,
+    "reason": "expired",
+    "date": "2024-01-30",
+    "performedBy": "Dr. Sarah Johnson"
+  },
+  {
+    "Id": 2,
+    "vaccineId": 9,
+    "adjustmentAmount": -3,
+    "reason": "damaged",
+    "date": "2024-02-15",
+    "performedBy": "Nurse Mike Chen"
+  },
+  {
+    "Id": 3,
+    "vaccineId": 11,
+    "adjustmentAmount": -1,
+    "reason": "spillage",
+    "date": "2024-03-10",
+    "performedBy": "Dr. Sarah Johnson"
+  },
+  {
+    "Id": 4,
+    "vaccineId": 22,
+    "adjustmentAmount": -5,
+    "reason": "temperature",
+    "date": "2024-03-25",
+    "performedBy": "Pharmacy Tech Lisa Wang"
+  },
+  {
+    "Id": 5,
+    "vaccineId": 24,
+    "adjustmentAmount": 2,
+    "reason": "counting_error",
+    "date": "2024-04-05",
+    "performedBy": "Nurse Mike Chen"
+  }
+]
